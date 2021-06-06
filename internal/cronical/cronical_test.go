@@ -20,18 +20,31 @@ func TestInputsAndOutputs(t *testing.T) {
 		if !testcase.IsDir() {
 			continue
 		}
-		tc, err := buildTestCase(testcase.Name())
-		require.NoError(t, err)
+		tc := buildTestCase(t, testcase.Name(), root)
 		t.Run(tc.name, func(t *testing.T) {
 
 		})
 	}
 }
 
-func buildTestCase(dir string) (testCase, error) {
-	return testCase{}, nil
+func buildTestCase(t *testing.T, dir string, rootDir string) testCase {
+	input, err := os.ReadFile(filepath.Join(rootDir, "testdata", dir, "input.ical"))
+	require.NoError(t, err)
+	output, err := os.ReadFile(filepath.Join(rootDir, "testdata", dir, "output.ical"))
+	require.NoError(t, err)
+	exclude, err := os.ReadFile(filepath.Join(rootDir, "testdata", dir, "exclude.cron"))
+	require.NoError(t, err)
+	return testCase{
+		input:   string(input),
+		output:  string(output),
+		exclude: string(exclude),
+		name:    filepath.Base(dir),
+	}
 }
 
 type testCase struct {
-	name string
+	input   string
+	output  string
+	exclude string
+	name    string
 }
