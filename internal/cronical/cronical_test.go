@@ -3,6 +3,7 @@ package cronical
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -78,12 +79,14 @@ func (ws *webcalServer) addWebcal(webcal string) (string, error) {
 }
 
 func cronicalGet(webcalUrl, exclude string) (string, error) {
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d", port), nil)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/filter", port), nil)
 	if err != nil {
 		return "", err
 	}
 	request.URL.Query().Add("exclude", exclude)
 	request.URL.Query().Add("ical", webcalUrl)
+	request.URL.RawQuery = request.URL.Query().Encode()
+	log.Printf("getting croncial at: %s", request.URL.String())
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return "", err
