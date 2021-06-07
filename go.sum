@@ -1,3 +1,7 @@
+github.com/andykuszyk/golang-ical v1.0.0 h1:US8xe8uK9NIM+s6ZoNM6DnxtGl+Eo42QA9tQvFDzBSg=
+github.com/andykuszyk/golang-ical v1.0.0/go.mod h1:3Fo6aCavD4wY7KNzi6z9D6e20a6FdqD/tIaHlU7GnMI=
+github.com/arran4/golang-ical v0.0.0-20210601225245-48fd351b08e7 h1:oOgavmDMGCnNtwZwNoXuK3jCcpF3I96Do9/5qPeSCr8=
+github.com/arran4/golang-ical v0.0.0-20210601225245-48fd351b08e7/go.mod h1:3Fo6aCavD4wY7KNzi6z9D6e20a6FdqD/tIaHlU7GnMI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

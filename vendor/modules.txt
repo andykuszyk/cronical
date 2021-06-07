@@ -1,3 +1,6 @@
+# github.com/arran4/golang-ical v0.0.0-20210601225245-48fd351b08e7 => github.com/andykuszyk/golang-ical v1.0.0
+## explicit
+github.com/arran4/golang-ical
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
@@ -18,3 +21,4 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 gopkg.in/yaml.v3
+# github.com/arran4/golang-ical => github.com/andykuszyk/golang-ical v1.0.0
