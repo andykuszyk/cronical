@@ -6,12 +6,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/gorhill/cronexpr"
 	log "github.com/sirupsen/logrus"
 )
 
-const port int = 8080
+const (
+	port           int = 8080
+	icalTimeFormat     = "20060102T150405Z"
+)
 
 func Run() {
 	http.HandleFunc("/filter/", handler)
@@ -35,7 +40,11 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Infof("handle with ical: %s and exclude: %s and url: %s", ical, exclude, req.URL.String())
+	log.
+		WithField("ical", ical).
+		WithField("cron_expression", exclude).
+		WithField("url", req.URL.String()).
+		Debug("handling /filter")
 
 	webcal, err := getWebcal(ical)
 	if err != nil {
@@ -55,6 +64,10 @@ func handler(resp http.ResponseWriter, req *http.Request) {
 }
 
 func filterWebcal(webcal, exclude string) (string, error) {
+	cron, err := cronexpr.Parse(exclude)
+	if err != nil {
+		return "", err
+	}
 	ical, err := ics.ParseCalendar(strings.NewReader(webcal))
 	if err != nil {
 		return "", err
@@ -66,10 +79,28 @@ func filterWebcal(webcal, exclude string) (string, error) {
 	filteredIcal.ClearEvents()
 
 	for _, event := range ical.Events() {
-		// TODO skip filtered events
+		start, err := time.Parse(icalTimeFormat, event.GetProperty(ics.ComponentPropertyDtStart).Value)
+		if err != nil {
+			return "", err
+		}
+		end, err := time.Parse(icalTimeFormat, event.GetProperty(ics.ComponentPropertyDtEnd).Value)
+		if err != nil {
+			return "", err
+		}
+
+		cronTime := cron.Next(start)
+		log.
+			WithField("start_time", start).
+			WithField("end_time", end).
+			WithField("cron_time", cronTime).
+			WithField("cron_expression", exclude).
+			Debug("evaluating event")
+		if cronTime.After(start) && cronTime.Before(end) {
+			continue
+		}
 		filteredIcal.AddEntireEvent(event)
 	}
-	return filteredIcal.Serialize(), nil
+	return strings.Replace(filteredIcal.Serialize(), "\r", "", -1), nil
 }
 
 func getWebcal(webcalUrl string) (string, error) {

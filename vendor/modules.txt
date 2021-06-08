@@ -7,6 +7,9 @@ github.com/davecgh/go-spew/spew
 # github.com/google/uuid v1.2.0
 ## explicit
 github.com/google/uuid
+# github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
+## explicit
+github.com/gorhill/cronexpr
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.8.1
