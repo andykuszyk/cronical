@@ -19,11 +19,29 @@ const (
 )
 
 func Run() {
-	http.HandleFunc("/filter/", handler)
+	http.HandleFunc("/filter/", filterHandler)
+	http.HandleFunc("/webcal/", webcalHandler)
 	go http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
-func handler(resp http.ResponseWriter, req *http.Request) {
+func webcalHandler(resp http.ResponseWriter, req *http.Request) {
+	encodedIcal := req.URL.Query().Get("ical")
+	ical, err := decodeFilter(encodedIcal)
+	if err != nil || len(ical) == 0 {
+		log.Warnf("error decoding ical filter: %s", err)
+		resp.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	webcal, err := getWebcal(ical)
+	if err != nil {
+		log.Warnf("error getting webcal: %s", err)
+		resp.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	resp.Write([]byte(webcal))
+}
+
+func filterHandler(resp http.ResponseWriter, req *http.Request) {
 	encodedIcal := req.URL.Query().Get("ical")
 	ical, err := decodeFilter(encodedIcal)
 	if err != nil || len(ical) == 0 {

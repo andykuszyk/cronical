@@ -4,26 +4,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestInputsAndOutputs(t *testing.T) {
+func TestFilter(t *testing.T) {
 	root, err := os.Getwd()
 	require.NoError(t, err)
 
 	testdata := filepath.Join(root, "testdata")
 	testcases, err := os.ReadDir(testdata)
 	require.NoError(t, err)
-
-	ws := newWebcalServer()
 
 	for _, testcase := range testcases {
 		if !testcase.IsDir() {
@@ -33,52 +29,30 @@ func TestInputsAndOutputs(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			webcalUrl, err := ws.addWebcal(tc.input)
 			assert.NoError(t, err)
-			actual, err := cronicalGet(webcalUrl, tc.exclude)
+			actual, err := cronicalGetFilter(webcalUrl, tc.exclude)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.output, actual)
 		})
 	}
 }
 
-type webcalServer struct {
-	port    int
-	webcals map[string]string
+func TestWebcal(t *testing.T) {
+	root, err := os.Getwd()
+	require.NoError(t, err)
+
+	testdata := filepath.Join(root, "testdata")
+	testcases, err := os.ReadDir(testdata)
+	require.NoError(t, err)
+
+	testcase := buildTestCase(t, testcases[0].Name(), root)
+	webcalUrl, err := ws.addWebcal(testcase.input)
+	require.NoError(t, err)
+	actual, err := cronicalGetWebcal(webcalUrl)
+	assert.NoError(t, err)
+	assert.Equal(t, testcase.input, actual)
 }
 
-func newWebcalServer() *webcalServer {
-	ws := &webcalServer{
-		port:    8081,
-		webcals: make(map[string]string),
-	}
-	go ws.start()
-	return ws
-}
-
-func (ws *webcalServer) start() {
-	http.HandleFunc("/", ws.handler)
-	http.ListenAndServe(fmt.Sprintf(":%d", ws.port), nil)
-}
-
-func (ws *webcalServer) handler(resp http.ResponseWriter, req *http.Request) {
-	id := req.URL.Query().Get("id")
-	if webcal, ok := ws.webcals[id]; ok {
-		resp.Write([]byte(webcal))
-		return
-	}
-	resp.WriteHeader(http.StatusNotFound)
-}
-
-func (ws *webcalServer) addWebcal(webcal string) (string, error) {
-	id := uuid.New().String()
-	ws.webcals[id] = webcal
-	u, err := url.Parse(fmt.Sprintf("http://localhost:%d?id=%s", ws.port, id))
-	if err != nil {
-		return "", err
-	}
-	return u.String(), nil
-}
-
-func cronicalGet(webcalUrl, exclude string) (string, error) {
+func cronicalGetFilter(webcalUrl, exclude string) (string, error) {
 	request, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf(
@@ -92,6 +66,30 @@ func cronicalGet(webcalUrl, exclude string) (string, error) {
 		return "", err
 	}
 	logrus.Infof("getting croncial at: %s", request.URL.String())
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
+
+func cronicalGetWebcal(webcalUrl string) (string, error) {
+	request, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"http://localhost:%d/webcal?ical=%s",
+			port,
+			encodeFilter(webcalUrl),
+		),
+		nil)
+	if err != nil {
+		return "", err
+	}
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return "", err
