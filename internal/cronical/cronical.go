@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/gin-gonic/gin"
 	"github.com/gorhill/cronexpr"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,12 +22,26 @@ const (
 )
 
 func Run() {
-	http.HandleFunc("/filter/", filterHandler)
-	http.HandleFunc("/webcal/", webcalHandler)
-	go http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Errorf("error getting working directory: %s", err)
+		os.Exit(1)
+	}
+	log.Infof("starting cronical with working directory: %s", dir)
+
+	r := gin.Default()
+	r.GET("/filter/", filterHandler)
+	r.GET("/webcal/", webcalHandler)
+	r.Static("/html/", filepath.Join(dir, "html"))
+
+	log.Infof("running cronical on port %d", port)
+	r.Run(fmt.Sprintf(":%d", port))
 }
 
-func webcalHandler(resp http.ResponseWriter, req *http.Request) {
+func webcalHandler(c *gin.Context) {
+	req := c.Request
+	resp := c.Writer
+
 	encodedIcal := req.URL.Query().Get("ical")
 	ical, err := decodeFilter(encodedIcal)
 	if err != nil || len(ical) == 0 {
@@ -41,7 +58,10 @@ func webcalHandler(resp http.ResponseWriter, req *http.Request) {
 	resp.Write([]byte(webcal))
 }
 
-func filterHandler(resp http.ResponseWriter, req *http.Request) {
+func filterHandler(c *gin.Context) {
+	req := c.Request
+	resp := c.Writer
+
 	encodedIcal := req.URL.Query().Get("ical")
 	ical, err := decodeFilter(encodedIcal)
 	if err != nil || len(ical) == 0 {
@@ -125,6 +145,9 @@ func getWebcal(webcalUrl string) (string, error) {
 	resp, err := http.Get(webcalUrl)
 	if err != nil {
 		return "", err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code getting ical: %d", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	bytes, err := ioutil.ReadAll(resp.Body)

@@ -52,6 +52,16 @@ func TestWebcal(t *testing.T) {
 	assert.Equal(t, testcase.input, actual)
 }
 
+func TestStaticFiles(t *testing.T) {
+	res, err := http.Get(fmt.Sprintf("http://localhost:%d/html/index.html", port))
+
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	body, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, err)
+	require.Contains(t, string(body), "html")
+}
+
 func cronicalGetFilter(webcalUrl, exclude string) (string, error) {
 	request, err := http.NewRequest(
 		http.MethodGet,

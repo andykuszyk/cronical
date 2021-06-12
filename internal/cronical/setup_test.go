@@ -15,7 +15,7 @@ var ws *webcalServer
 func TestMain(m *testing.M) {
 	logrus.SetLevel(logrus.DebugLevel)
 	ws = newWebcalServer()
-	Run()
+	go Run()
 	m.Run()
 }
 
@@ -34,7 +34,7 @@ func newWebcalServer() *webcalServer {
 }
 
 func (ws *webcalServer) start() {
-	http.HandleFunc("/", ws.handler)
+	http.HandleFunc("/webcalmock", ws.handler)
 	http.ListenAndServe(fmt.Sprintf(":%d", ws.port), nil)
 }
 
@@ -50,7 +50,7 @@ func (ws *webcalServer) handler(resp http.ResponseWriter, req *http.Request) {
 func (ws *webcalServer) addWebcal(webcal string) (string, error) {
 	id := uuid.New().String()
 	ws.webcals[id] = webcal
-	u, err := url.Parse(fmt.Sprintf("http://localhost:%d?id=%s", ws.port, id))
+	u, err := url.Parse(fmt.Sprintf("http://localhost:%d/webcalmock?id=%s", ws.port, id))
 	if err != nil {
 		return "", err
 	}

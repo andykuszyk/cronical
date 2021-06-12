@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+
+
+<link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.css' rel='stylesheet' />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.print.css' rel='stylesheet' media='print' />
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.js'></script>
+
+
+<script src="ical.js"></script>
+<script src="ical_events.js"></script>
+<script src="ical_fullcalendar.js"></script>
+<script src="colorize_fullcalendar.js"></script>
+<script src="demo.js"></script>
+
+<style>
+body {
+    font-family:monospace;
+    font-size 12px;
+}
+#calendar {
+    max-width: 900px;
+    margin: 0 auto 2em;
+}
+.event-tgh9qho17b07pk2n2ji3gluansgooglecom {
+    background:green;
+}
+</style>
+
+</head>
+<body>
+    <p>Most of the demo events are between December 2015 and March 2016.</p>
+    <p><button onclick="colorize_events()">Colorize</button> events (see <a href="colorize_fullcalendar.js">colorize_fullcalendar.js</a>)</p>
+    <div id='calendar'></div>
+</body>
+</html>
