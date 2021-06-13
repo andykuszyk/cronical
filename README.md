@@ -11,3 +11,15 @@ curl http://localhost:8080/filter?ical=<ical>&exclude=<cron>
 ```
 
 Where the `<ical>` parameter is the base64 encoded URL of the WebCal to filter, and the `<cron>` parameter is the base64 encoded CRON expression to use when filtering out events.
+
+### Other routes
+To retrieve a webcal feed unaltered (e.g. to avoid CORS restrictions), the following route can be used:
+
+```sh
+curl http://localhost:8080/webcal?ical=<ical>
+```
+
+Where the `<ical>` parameter is the base64 encoded URL of the webcal to return.
+
+### Local development
+Croncial can be run locally on port 8080 using `docker-compose up`.
