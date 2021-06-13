@@ -1,4 +1,4 @@
-ics_sources = ['http://localhost:8080/webcal?ical=aHR0cHM6Ly9mb3JtMy5wYWdlcmR1dHkuY29tL3ByaXZhdGUvZjBiYzBjNGY0N2ViYWY5OWM2MDNiY2NiN2IwYjIyMTUyMzNmZjcwY2']
+ics_sources = ['http://localhost:8080/filter?ical=aHR0cHM6Ly9mb3JtMy5wYWdlcmR1dHkuY29tL3ByaXZhdGUvZjBiYzBjNGY0N2ViYWY5OWM2MDNiY2NiN2IwYjIyMTUyMzNmZjcwY2FmNzM0ODY3OWZmYTBjMDFlNGZkM2M2YS9mZWVk&exclude=KiA5LTE2ICogKiAq']
 
 
 function data_req (url, callback) {
