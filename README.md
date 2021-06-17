@@ -7,19 +7,15 @@ My motivtion for creating it, is that I want to add my on-call calendar to my pe
 The basic usage of Cronical (assuming it's running on port 8080) is:
 
 ```sh
-curl http://localhost:8080/filter?ical=<ical>&exclude=<cron>
+curl http://localhost:8080/webcal?ical=<ical>&exclude=<cron>
 ```
 
 Where the `<ical>` parameter is the base64 encoded URL of the WebCal to filter, and the `<cron>` parameter is the base64 encoded CRON expression to use when filtering out events.
 
-### Other routes
-To retrieve a webcal feed unaltered (e.g. to avoid CORS restrictions), the following route can be used:
-
-```sh
-curl http://localhost:8080/webcal?ical=<ical>
-```
-
-Where the `<ical>` parameter is the base64 encoded URL of the webcal to return.
+> If the `cron` parameter is omitted, the webcal feed will be returned unaltered.
 
 ### Local development
 Croncial can be run locally on port 8080 using `docker-compose up`.
+
+## Credits
+The webcal conversion and calendar widget are taken from https://github.com/bricewge/icalendar2fullcalendar.
