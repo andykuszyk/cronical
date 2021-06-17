@@ -30,8 +30,7 @@ func Run() {
 	log.Infof("starting cronical with working directory: %s", dir)
 
 	r := gin.Default()
-	r.GET("/filter/", filterHandler)
-	r.GET("/webcal/", webcalHandler)
+	r.GET("/webcal", webcalHandler)
 	r.Static("/html/", filepath.Join(dir, "html"))
 
 	log.Infof("running cronical on port %d", port)
@@ -49,40 +48,23 @@ func webcalHandler(c *gin.Context) {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	webcal, err := getWebcal(ical)
-	if err != nil {
-		log.Warnf("error getting webcal: %s", err)
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	resp.Write([]byte(webcal))
-}
-
-func filterHandler(c *gin.Context) {
-	req := c.Request
-	resp := c.Writer
-
-	encodedIcal := req.URL.Query().Get("ical")
-	ical, err := decodeFilter(encodedIcal)
-	if err != nil || len(ical) == 0 {
-		log.Warnf("error decoding ical filter: %s", err)
-		resp.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
 	encodedExclude := req.URL.Query().Get("exclude")
-	exclude, err := decodeFilter(encodedExclude)
-	if err != nil || len(exclude) == 0 {
-		log.Warnf("error decoding exclude filter: %s", err)
-		resp.WriteHeader(http.StatusBadRequest)
-		return
+	exclude := ""
+	if encodedExclude != "" {
+		exclude, err = decodeFilter(encodedExclude)
+		if err != nil || len(exclude) == 0 {
+			log.Warnf("error decoding exclude filter: %s", err)
+			resp.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
 
 	log.
 		WithField("ical", ical).
 		WithField("cron_expression", exclude).
 		WithField("url", req.URL.String()).
-		Debug("handling /filter")
+		Debug("handling /webcal")
 
 	webcal, err := getWebcal(ical)
 	if err != nil {
@@ -91,11 +73,14 @@ func filterHandler(c *gin.Context) {
 		return
 	}
 
-	filteredWebcal, err := filterWebcal(webcal, exclude)
-	if err != nil {
-		log.Warnf("error filtering webcal: %s", err)
-		resp.WriteHeader(http.StatusInternalServerError)
-		return
+	filteredWebcal := webcal
+	if exclude != "" {
+		filteredWebcal, err = filterWebcal(webcal, exclude)
+		if err != nil {
+			log.Warnf("error filtering webcal: %s", err)
+			resp.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 	resp.Header().Add("content-type", "text/calendar")
 	resp.Write([]byte(filteredWebcal))
@@ -142,7 +127,7 @@ func filterWebcal(webcal, exclude string) (string, error) {
 }
 
 func getWebcal(webcalUrl string) (string, error) {
-	resp, err := http.Get(webcalUrl)
+	resp, err := http.Get(strings.Replace(webcalUrl, "webcal", "http", 1))
 	if err != nil {
 		return "", err
 	}

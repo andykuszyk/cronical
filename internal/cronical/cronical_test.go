@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFilter(t *testing.T) {
+func TestGetWebCal(t *testing.T) {
 	root, err := os.Getwd()
 	require.NoError(t, err)
 
@@ -36,22 +36,6 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestWebcal(t *testing.T) {
-	root, err := os.Getwd()
-	require.NoError(t, err)
-
-	testdata := filepath.Join(root, "testdata")
-	testcases, err := os.ReadDir(testdata)
-	require.NoError(t, err)
-
-	testcase := buildTestCase(t, testcases[0].Name(), root)
-	webcalUrl, err := ws.addWebcal(testcase.input)
-	require.NoError(t, err)
-	actual, err := cronicalGetWebcal(webcalUrl)
-	assert.NoError(t, err)
-	assert.Equal(t, testcase.input, actual)
-}
-
 func TestStaticFiles(t *testing.T) {
 	res, err := http.Get(fmt.Sprintf("http://localhost:%d/html/index.html", port))
 
@@ -63,14 +47,24 @@ func TestStaticFiles(t *testing.T) {
 }
 
 func cronicalGetFilter(webcalUrl, exclude string) (string, error) {
-	request, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"http://localhost:%d/filter?ical=%s&exclude=%s",
+	var url string
+	if exclude == "" {
+		url = fmt.Sprintf(
+			"http://localhost:%d/webcal?ical=%s",
+			port,
+			encodeFilter(webcalUrl),
+		)
+	} else {
+		url = fmt.Sprintf(
+			"http://localhost:%d/webcal?ical=%s&exclude=%s",
 			port,
 			encodeFilter(webcalUrl),
 			encodeFilter(exclude),
-		),
+		)
+	}
+	request, err := http.NewRequest(
+		http.MethodGet,
+		url,
 		nil)
 	if err != nil {
 		return "", err

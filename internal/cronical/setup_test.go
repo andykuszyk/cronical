@@ -50,7 +50,7 @@ func (ws *webcalServer) handler(resp http.ResponseWriter, req *http.Request) {
 func (ws *webcalServer) addWebcal(webcal string) (string, error) {
 	id := uuid.New().String()
 	ws.webcals[id] = webcal
-	u, err := url.Parse(fmt.Sprintf("http://localhost:%d/webcalmock?id=%s", ws.port, id))
+	u, err := url.Parse(fmt.Sprintf("webcal://localhost:%d/webcalmock?id=%s", ws.port, id))
 	if err != nil {
 		return "", err
 	}
