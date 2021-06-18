@@ -37,7 +37,7 @@ func TestGetWebCal(t *testing.T) {
 }
 
 func TestStaticFiles(t *testing.T) {
-	res, err := http.Get(fmt.Sprintf("http://localhost:%d/html/index.html", port))
+	res, err := http.Get(fmt.Sprintf("http://localhost:%d/index.html", port))
 
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, res.StatusCode)

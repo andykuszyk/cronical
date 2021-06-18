@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	ics "github.com/arran4/golang-ical"
-	"github.com/gin-gonic/gin"
 	"github.com/gorhill/cronexpr"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,24 +19,18 @@ const (
 )
 
 func Run() {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Errorf("error getting working directory: %s", err)
-		os.Exit(1)
-	}
-	log.Infof("starting cronical with working directory: %s", dir)
-
-	r := gin.Default()
-	r.GET("/webcal", webcalHandler)
-	r.Static("/html/", filepath.Join(dir, "html"))
-
 	log.Infof("running cronical on port %d", port)
-	r.Run(fmt.Sprintf(":%d", port))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/webcal", webcalHandler)
+	mux.Handle("/", http.FileServer(http.Dir("./html/")))
+	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
-func webcalHandler(c *gin.Context) {
-	req := c.Request
-	resp := c.Writer
+func webcalHandler(resp http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		resp.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 
 	encodedIcal := req.URL.Query().Get("ical")
 	ical, err := decodeFilter(encodedIcal)
