@@ -10,5 +10,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: docker login hub.docker.com -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" registry-1.docker.io
       - run: make publish
