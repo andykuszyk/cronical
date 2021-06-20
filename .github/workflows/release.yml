@@ -5,7 +5,7 @@ on:
 jobs:
   release:
     env:
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     runs-on: ubuntu-latest
     steps:
